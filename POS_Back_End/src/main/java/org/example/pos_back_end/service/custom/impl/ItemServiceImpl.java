@@ -29,7 +29,6 @@ public class ItemServiceImpl implements ItemService {
             throw new NullPointerException("Item is null");
         }
 
-        // Check if item already exists
         if (itemRepository.existsById(itemDTO.getCode())) {
             throw new RuntimeException("Item with code " + itemDTO.getCode() + " already exists");
         }
@@ -43,7 +42,6 @@ public class ItemServiceImpl implements ItemService {
             throw new NullPointerException("Item is null");
         }
 
-        // Check if item exists
         if (!itemRepository.existsById(itemDTO.getCode())) {
             throw new RuntimeException("Item with code " + itemDTO.getCode() + " not found");
         }
@@ -78,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new RuntimeException("Item with code " + itemCode + " not found"));
 
         if (item.getQtyOnHand() < qty) {
-            return false; // Insufficient stock
+            return false;
         }
 
         item.setQtyOnHand(item.getQtyOnHand() - qty);

@@ -33,14 +33,11 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("OrderDTO or items cannot be null/empty");
         }
 
-        // 1️⃣ Validate Customer
         Customer customer = customerRepository.findById(orderDTO.getCId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        // 2️⃣ Generate Order ID
         String orderId = generateOrderId();
 
-        // 3️⃣ Create Order
         Order order = new Order();
         order.setOrderId(orderId);
         order.setCustomer(customer);
@@ -48,7 +45,6 @@ public class OrderServiceImpl implements OrderService {
 
         double total = 0.0;
 
-        // 4️⃣ Process Items
         for (OrderDetailDTO detailDTO : orderDTO.getItems()) {
 
             if (detailDTO.getItemCode() == null) {
@@ -58,69 +54,55 @@ public class OrderServiceImpl implements OrderService {
             Item item = itemRepository.findById(detailDTO.getItemCode())
                     .orElseThrow(() -> new RuntimeException("Item not found: " + detailDTO.getItemCode()));
 
-            // Check stock
             if (item.getQtyOnHand() < detailDTO.getQty()) {
                 throw new RuntimeException("Insufficient stock for item: " + item.getDescription());
             }
 
-            // Reduce stock
             item.setQtyOnHand(item.getQtyOnHand() - detailDTO.getQty());
             itemRepository.save(item);
 
-            // Create OrderDetail
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
             detail.setItem(item);
             detail.setQty(detailDTO.getQty());
             detail.setUnitPrice(detailDTO.getUnitPrice());
 
-            // Add to order
             order.getOrderDetails().add(detail);
 
-            // Calculate total
             total += detailDTO.getQty() * detailDTO.getUnitPrice();
         }
 
         order.setTotal(total);
-
-        // Save order (cascade saves orderDetails)
         orderRepository.save(order);
 
-        // ★★★ IMPORTANT: Set the generated orderId in the DTO before returning ★★★
-        orderDTO.setOrderId(orderId);  // ← ADD THIS LINE!
+        orderDTO.setOrderId(orderId);
 
         return orderDTO;
     }
 
     private String generateOrderId() {
-        // Get all existing order IDs
         List<Order> allOrders = orderRepository.findAll();
 
         if (allOrders.isEmpty()) {
-            return "OD001"; // First order
+            return "OD001";
         }
 
-        // Find the highest number
         int maxNumber = 0;
         for (Order order : allOrders) {
             String orderId = order.getOrderId();
             if (orderId != null && orderId.startsWith("OD")) {
                 try {
-                    // Extract the number part (after "OD")
                     String numberPart = orderId.substring(2);
                     int num = Integer.parseInt(numberPart);
                     if (num > maxNumber) {
                         maxNumber = num;
                     }
-                } catch (NumberFormatException e) {
-                    // Skip if not a number format
-                }
+                } catch (NumberFormatException e) {}
             }
         }
 
-        // Increment and format with leading zeros
         int nextNumber = maxNumber + 1;
-        return String.format("OD%03d", nextNumber); // OD001, OD002, ..., OD999
+        return String.format("OD%03d", nextNumber);
     }
 
     @Override
@@ -154,7 +136,6 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Restore stock for each orderDetail
         for (OrderDetail detail : order.getOrderDetails()) {
             Item item = detail.getItem();
             item.setQtyOnHand(item.getQtyOnHand() + detail.getQty());
