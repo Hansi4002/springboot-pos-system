@@ -22,7 +22,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<APIResponse<OrderDTO>> placeOrder(@RequestBody OrderDTO orderDTO) {
         try {
-            OrderDTO savedOrder = orderService.placeOrder(orderDTO); // get DTO with orderId
+            OrderDTO savedOrder = orderService.placeOrder(orderDTO);
             return new ResponseEntity<>(
                     new APIResponse<>(201, "Order Placed Successfully", savedOrder),
                     HttpStatus.CREATED
