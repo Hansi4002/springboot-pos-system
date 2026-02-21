@@ -35,6 +35,18 @@ public class CustomerController {
                 200,"Customer Deleted",null), HttpStatus.OK);
     }
 
+    @GetMapping("/{customerId}")
+    public ResponseEntity<APIResponse<CustomerDTO>> getCustomer(
+            @PathVariable String customerId) {
+
+        CustomerDTO customer = customerService.getCustomer(customerId);
+
+        return new ResponseEntity<>(
+                new APIResponse<>(200, "Customer Found", customer),
+                HttpStatus.OK
+        );
+    }
+
     @PutMapping
     public ResponseEntity<APIResponse<String>> updateCustomer(@RequestBody CustomerDTO customerDTO){
         customerService.updateCustomer(customerDTO);

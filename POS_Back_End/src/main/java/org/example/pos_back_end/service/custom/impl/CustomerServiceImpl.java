@@ -48,4 +48,11 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> customers = customerRepository.findAll();
         return modelMapper.map(customers,new TypeToken<List<CustomerDTO>>(){}.getType());
     }
+
+    @Override
+    public CustomerDTO getCustomer(String id) {
+        return customerRepository.findById(id)
+                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
 }

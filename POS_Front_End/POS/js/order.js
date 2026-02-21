@@ -148,8 +148,8 @@ function updateCartDisplay() {
         `);
     });
 
-    $('#subtotal').text(`$${subtotal.toFixed(2)}`);
-    $('#total').text(`$${subtotal.toFixed(2)}`);
+    $('#subtotal').text(`Rs.${subtotal.toFixed(2)}`);
+    $('#total').text(`Rs.${subtotal.toFixed(2)}`);
 }
 
 function removeFromCart(index) {
